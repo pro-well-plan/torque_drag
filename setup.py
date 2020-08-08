@@ -12,7 +12,7 @@ setup(
     long_description_content_type="text/markdown",
     author='Pro Well Plan AS',
     author_email='juan@prowellplan.com',
-    url='https://github.com/pro-well-plan/pwptemp',
+    url='https://github.com/pro-well-plan/torque-drag',
     keywords='drilling',
     classifiers=['Programming Language :: Python :: 3',
                  'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
