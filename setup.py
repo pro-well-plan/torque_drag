@@ -3,8 +3,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='torque-drag',
-    packages=['torque-drag'],
+    name='torque_drag',
+    packages=['torque_drag'],
     version='0.0.1',
     license='LGPL v3',
     description='Torque and Drag Calculation',
