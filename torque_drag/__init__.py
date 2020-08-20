@@ -1,1 +1,1 @@
-from .main import calc
+from .main import *

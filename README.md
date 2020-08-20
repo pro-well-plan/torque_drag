@@ -10,8 +10,10 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Get torque-drag
 
-* Source code from [Github](https://github.com/pro-well-plan/torque-drag)
-    * `git clone https://github.com/pro-well-plan/torque-drag`
+* Users: Wheels for Python from [PyPI](https://pypi.python.org/pypi/torque-drag/) 
+    * `pip install torque_drag`
+* Source code from [Github](https://github.com/pro-well-plan/torque_drag)
+    * `git clone https://github.com/pro-well-plan/torque_drag`
 
     
 ## Contributing
