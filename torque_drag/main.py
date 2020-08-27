@@ -152,7 +152,7 @@ def calc(well, case="all", fric=0.24, torque_calc=False):
     return Result()
 
 
-def create_well(well, od_pipe, id_pipe, od_annular, rhof=1.3, rhod=7.8, wob=0, tbit=0):
+def create_well(well, od_pipe, id_pipe, od_annular, length_pipe, rhof=1.3, rhod=7.8, wob=0, tbit=0):
     class NewWell(object):
         def __init__(self):
             self.r1 = id_pipe / 2
@@ -163,14 +163,13 @@ def create_well(well, od_pipe, id_pipe, od_annular, rhof=1.3, rhod=7.8, wob=0, t
                 self.rhof = [rhof] * well.zstep
             self.rhod = rhod
             self.deltaz = well.deltaz
-            self.zstep = len(well.md)
+            self.zstep = round(length_pipe / self.deltaz) + 1
             self.wob = wob
             self.tbit = tbit
-            self.azimuth = well.azimuth
-            self.tvd = well.tvd
-            self.md = well.md
-            self.inclination = well.inclination
+            self.rhof = self.rhof[:self.zstep]
+            self.azimuth = well.azimuth[:self.zstep]
+            self.tvd = well.tvd[:self.zstep]
+            self.md = well.md[:self.zstep]
+            self.inclination = well.inclination[:self.zstep]
 
-    new_well = NewWell()
-
-    return new_well
+    return NewWell()
