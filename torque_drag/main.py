@@ -24,7 +24,7 @@ def calc(well, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0,
     area_a = pi * ((well.r3 ** 2) - (well.r2 ** 2))
     area_ds = pi * (well.r1 ** 2)
     buoyancy = [1 - ((x * area_a) - (x * area_ds)) / (well.rhod * (area_a - area_ds)) for x in well.rhof]
-    w = [unit_pipe_weight * well.deltaz * x for x in buoyancy]
+    w = [unit_pipe_weight * y * x for x, y in zip(buoyancy, well.deltaz)]
     w[0] = 0
 
     if type(fric) is not list:
@@ -139,18 +139,20 @@ def set_conditions(well, dimensions, densities=None, wob=0, tbit=0):
             self.r1 = dimensions['id_pipe'] / 2
             self.r2 = dimensions['od_pipe'] / 2
             self.r3 = dimensions['od_annular'] / 2
+            self.rhod = densities['rhod']
+            self.deltaz = [0]
+            for x in range(1, len(well.md)):
+                self.deltaz.append(well.md[x] - well.md[x-1])
+            self.zstep = len(self.deltaz)
             self.rhof = densities['rhof']
             if type(densities['rhof']) is not list:
-                self.rhof = [densities['rhof']] * well.zstep
-            self.rhod = densities['rhod']
-            self.deltaz = well.deltaz
-            self.zstep = round(dimensions['length_pipe'] / self.deltaz) + 1
+                self.rhof = [densities['rhof']] * self.zstep
             self.wob = wob
             self.tbit = tbit
-            self.rhof = self.rhof[:self.zstep]
-            self.azimuth = well.azimuth[:self.zstep]
-            self.tvd = well.tvd[:self.zstep]
-            self.md = well.md[:self.zstep]
-            self.inclination = well.inclination[:self.zstep]
+            self.rhof = self.rhof
+            self.azimuth = well.azimuth
+            self.tvd = well.tvd
+            self.md = well.md
+            self.inclination = well.inclination
 
     return NewWell()
