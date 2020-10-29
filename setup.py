@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 setup(
     name='torque_drag',
     packages=['torque_drag'],
-    version='0.0.4',
+    version='0.0.5',
     license='LGPL v3',
     description='Torque and Drag Calculation',
     long_description=long_description,
