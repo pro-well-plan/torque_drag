@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'torque-drag'
+project = 'torque_drag'
 copyright = '2020, Pro Well Plan AS'
 author = 'Pro Well Plan AS'
 

@@ -5,7 +5,7 @@ torque_drag is written to be compatible with Python 3+. The best way to install 
 
 .. code-block:: bash
 
-    $ pip install torque_drag
+    $ pip install torque-drag
 
 This will make sure that all the dependencies are installed. This requirements are listed below.
 
