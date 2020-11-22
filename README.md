@@ -1,12 +1,19 @@
 ![](https://user-images.githubusercontent.com/52009346/69100304-2eb3e800-0a5d-11ea-9a3a-8e502af2120b.png)
 
+
+[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/pro-well-plan/torque_drag/blob/master/LICENSE.md)
 [![PyPI version](https://badge.fury.io/py/torque-drag.svg)](https://badge.fury.io/py/torque-drag)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Webapp](https://img.shields.io/badge/WebApp-On-green.svg)](https://pwp-opensource.herokuapp.com/)
+[![Documentation Status](https://readthedocs.org/projects/torque_drag/badge/?version=latest)](http://torque_drag.readthedocs.io/?badge=latest)
 
 ## Introduction
 torque-drag is a tool to calculate drag forces and torque along the well. Features are added as they
 are needed; suggestions and contributions of all kinds are very welcome.
+
+## Documentation
+
+See here for the [complete torque_drag package documentation](https://torque_drag.readthedocs.io/en/latest/).
 
 ## Getting Started
 

@@ -4,18 +4,22 @@ from math import pi, sin, cos, radians
 def calc(well, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0, torque_calc=False):
     """
     Function to generate the torque and drag profiles. Model Source: SPE-11380-PA
-    :param well: a well object with rhod (drill string density), r1 (inner diameter of drill string), r2 (outer diameter
-    of drill string), r3 (diameter of the first casing layer or borehole), rhof (fluid density), rhod (density of drill
-    pipe) deltaz (length per pipe segment), wob (weight on bit), tbit (torque on bit), azimuth (for each segment) and
-    inclination (for each segment).
-    :param dimensions: dict for dimensions {'od_pipe': , 'id_pipe': , 'length_pipe': , 'od_annular': }
-    :param densities: dict for densities {'rhof': 1.3, 'rhod': 7.8}
-    :param case: "lowering", "static", "hoisting" or "all"
-    :param fric: sliding friction coefficient between DP-wellbore.
-    :param tbit: torque on bit, kN*m
-    :param wob: weight on bit, kN
-    :param torque_calc: boolean, include torque calculation
-    :return: two lists, drag force and torque in kN and kN*m
+
+    Arguments:
+        well: a well object with rhod (drill string density), r1 (inner diameter of drill string), r2 (outer diameter
+        of drill string), r3 (diameter of the first casing layer or borehole), rhof (fluid density), rhod (density of
+        drill pipe), wob (weight on bit), tbit (torque on bit), azimuth (for each
+        segment) and inclination (for each segment).
+        dimensions: dict for dimensions {'od_pipe': , 'id_pipe': , 'length_pipe': , 'od_annular': }
+        densities: dict for densities {'rhof': 1.3, 'rhod': 7.8}
+        case: "lowering", "static", "hoisting" or "all"
+        fric: sliding friction coefficient between DP-wellbore.
+        tbit: torque on bit, kN*m
+        wob: weight on bit, kN
+        torque_calc: boolean, include torque calculation
+
+    Returns:
+        object with drag force and torque in kN and kN*m
     """
 
     well = set_conditions(well, dimensions, densities, wob, tbit)
