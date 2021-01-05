@@ -6,6 +6,7 @@
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Webapp](https://img.shields.io/badge/WebApp-On-green.svg)](https://pwp-opensource.herokuapp.com/)
 [![Documentation Status](https://readthedocs.org/projects/torque_drag/badge/?version=latest)](http://torque_drag.readthedocs.io/?badge=latest)
+[![Downloads](https://pepy.tech/badge/torque-drag)](https://pepy.tech/project/torque-drag)
 
 ## Introduction
 torque-drag is a tool to calculate drag forces and torque along the well. Features are added as they
