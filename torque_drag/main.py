@@ -1,22 +1,12 @@
 from math import pi, sin, cos, radians
 
 
-def calc(well, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0, torque_calc=False):
+def calc(trajectory, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0, torque_calc=False):
     """
     Function to generate the torque and drag profiles. Model Source: SPE-11380-PA
 
     Arguments:
-        well: a well object (well_profile package) with:
-            rhod (drill string density),
-            r1 (inner diameter of drill string),
-            r2 (outer diameter of drill string),
-            r3 (diameter of the first casing layer or borehole),
-            rhof (fluid density),
-            rhod (density of drill pipe),
-            wob (weight on bit),
-            tbit (torque on bit),
-            azimuth (for each segment) and
-            inclination (for each segment).
+        trajectory: a trajectory object from well_profile library
         dimensions: dict for dimensions {'od_pipe': , 'id_pipe': , 'length_pipe': , 'od_annular': }
         densities: dict for densities {'rhof': 1.3, 'rhod': 7.8}
         case: "lowering", "static", "hoisting" or "all"
@@ -29,13 +19,13 @@ def calc(well, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0,
         object with drag force and torque in kN and kN*m
     """
 
-    well = set_conditions(well, dimensions, densities, wob, tbit)
+    well = set_conditions(trajectory, dimensions, densities, wob, tbit)
 
     unit_pipe_weight = well.rhod * 9.81 * pi * (well.r2 ** 2 - well.r1 ** 2)
-    area_a = pi * ((well.r3 ** 2) - (well.r2 ** 2))
-    area_ds = pi * (well.r1 ** 2)
+    area_a = pi * ((well.r3 ** 2) - (well.r2 ** 2))     # annular area in m2
+    area_ds = pi * (well.r1 ** 2)       # drill string inner area in m2
     buoyancy = [1 - ((x * area_a) - (x * area_ds)) / (well.rhod * (area_a - area_ds)) for x in well.rhof]
-    w = [unit_pipe_weight * y * x for x, y in zip(buoyancy, well.deltaz)]
+    w = [unit_pipe_weight * y * x for x, y in zip(buoyancy, well.deltaz)]       # in N
     w[0] = 0
 
     if type(fric) is not list:
@@ -137,7 +127,7 @@ def calc(well, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0,
     return Result()
 
 
-def set_conditions(well, dimensions, densities=None, wob=0, tbit=0):
+def set_conditions(trajectory, dimensions, densities=None, wob=0, tbit=0):
 
     wob *= 1000
     tbit *= 1000
@@ -147,23 +137,23 @@ def set_conditions(well, dimensions, densities=None, wob=0, tbit=0):
 
     class NewWell(object):
         def __init__(self):
-            self.r1 = dimensions['id_pipe'] / 2
-            self.r2 = dimensions['od_pipe'] / 2
-            self.r3 = dimensions['od_annular'] / 2
-            self.rhod = densities['rhod']
+            self.r1 = dimensions['id_pipe'] / 2 / 39.37
+            self.r2 = dimensions['od_pipe'] / 2 / 39.37
+            self.r3 = dimensions['od_annular'] / 2 / 39.37
+            self.rhod = densities['rhod'] * 1000
             self.deltaz = [0]
-            for x in range(1, len(well.md)):
-                self.deltaz.append(well.md[x] - well.md[x-1])
+            for x in range(1, len(trajectory.md)):
+                self.deltaz.append(trajectory.md[x] - trajectory.md[x-1])
             self.zstep = len(self.deltaz)
-            self.rhof = densities['rhof']
             if type(densities['rhof']) is not list:
-                self.rhof = [densities['rhof']] * self.zstep
-            self.wob = wob
-            self.tbit = tbit
-            self.rhof = self.rhof
-            self.azimuth = well.azimuth
-            self.tvd = well.tvd
-            self.md = well.md
-            self.inclination = well.inclination
+                self.rhof = [densities['rhof'] * 1000] * self.zstep
+            else:
+                self.rhof = densities['rhof'] * 1000    # in kg/m3
+            self.wob = wob      # in N
+            self.tbit = tbit        # in Nm
+            self.azimuth = trajectory.azimuth
+            self.tvd = trajectory.tvd
+            self.md = trajectory.md
+            self.inclination = trajectory.inclination
 
     return NewWell()
