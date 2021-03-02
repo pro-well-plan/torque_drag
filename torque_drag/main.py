@@ -1,16 +1,17 @@
 from math import pi, sin, cos, radians
 
 
-def calc(trajectory, dimensions, densities=None, case="all", fric=0.24, wob=0, tbit=0, torque_calc=False):
+def calc(trajectory, dimensions, densities=None, case="all", fric=None, wob=0, tbit=0, torque_calc=False):
     """
     Function to generate the torque and drag profiles. Model Source: SPE-11380-PA
 
     Arguments:
         trajectory: a trajectory object from well_profile library
-        dimensions: dict for dimensions {'od_pipe': , 'id_pipe': , 'length_pipe': , 'od_annular': }
+        dimensions: dict for dimensions {'pipe': {'od', 'id', 'length}, 
+                                         'odAnn'}
         densities: dict for densities {'rhof': 1.3, 'rhod': 7.8}
         case: "lowering", "static", "hoisting" or "all"
-        fric: sliding friction coefficient between DP-wellbore.
+        fric: num or list. sliding friction coefficient between DP-wellbore. default: 0.24
         tbit: torque on bit, kN*m
         wob: weight on bit, kN
         torque_calc: boolean, include torque calculation
@@ -21,102 +22,112 @@ def calc(trajectory, dimensions, densities=None, case="all", fric=0.24, wob=0, t
 
     well = set_conditions(trajectory, dimensions, densities, wob, tbit)
 
-    unit_pipe_weight = well.rhod * 9.81 * pi * (well.r2 ** 2 - well.r1 ** 2)
-    area_a = pi * ((well.r3 ** 2) - (well.r2 ** 2))     # annular area in m2
-    area_ds = pi * (well.r1 ** 2)       # drill string inner area in m2
-    buoyancy = [1 - ((x * area_a) - (x * area_ds)) / (well.rhod * (area_a - area_ds)) for x in well.rhof]
-    w = [unit_pipe_weight * y * x for x, y in zip(buoyancy, well.deltaz)]       # in N
-    w[0] = 0
+    unit_pipe_weight = well.rhod * 9.81 * pi * (well.pipe_or ** 2 - well.pipe_ir ** 2)
+    area_a = pi * ((well.ann_or ** 2) - (well.pipe_or ** 2))     # annular area in m2
+    area_ds = pi * (well.pipe_ir ** 2)       # drill string inner area in m2
+
+    for point in well.trajectory:
+        point['buoyancy'] = 1 - ((point['rhof'] * area_a) - (point['rhof'] * area_ds)) / (well.rhod * (area_a-area_ds))
+        point['weight'] = unit_pipe_weight * point['delta']['md'] * point['buoyancy']
 
     if type(fric) is not list:
-        fric = [fric] * len(well.inclination)
+        for point in well.trajectory:
+            point['fric'] = 0.24
+    else:
+        for idx, point in enumerate(well.trajectory):
+            point['fric'] = fric[idx]
 
-    force_1, force_2, force_3 = [well.wob], [well.wob], [well.wob]      # Force at bottom
-    torque_1, torque_2, torque_3 = None, None, None  # Torque at bottom
+    well.trajectory[-1]['force'] = {'lowering': well.wob,
+                                    'static': well.wob,
+                                    'hoisting': well.wob}
+    well.trajectory[-1]['torque'] = {'lowering': None,
+                                     'static': None,
+                                     'hoisting': None}
+
     if torque_calc:
-        torque_1, torque_2, torque_3 = [well.tbit], [well.tbit], [well.tbit]        # Torque at bottom
+        well.trajectory[-1]['torque'] = {'lowering': well.tbit,
+                                         'static': well.tbit,
+                                         'hoisting': well.tbit}
 
-    for x in reversed(range(1, well.zstep)):
-        delta_azi = radians(well.azimuth[x] - well.azimuth[x-1])
-        delta_inc = radians(well.inclination[x] - well.inclination[x-1])
-        inc_avg = radians((well.inclination[x] + well.inclination[x-1]) / 2)
-
+    for idx, point in reversed(list(enumerate(well.trajectory[:-1]))):
+        point['incAvg'] = radians((point['inc'] + well.trajectory[idx-1]['inc']) / 2)
+        delta_azi = -radians(well.trajectory[idx+1]['delta']['azi'])
+        delta_inc = -radians(well.trajectory[idx+1]['delta']['inc'])
+        point['force'] = {}
+        point['torque'] = {}
         # DRAG FORCE CALCULATIONS
         if (case == "lowering") or (case == "all"):
-
             # Drag force
-            fn_1 = ((force_1[-1] * delta_azi * sin(inc_avg)) ** 2
-                    + (force_1[-1] * delta_inc + w[x] * sin(inc_avg)) ** 2) ** 0.5
+            fn_1 = ((well.trajectory[idx+1]['force']['lowering'] * delta_azi * sin(point['incAvg'])) ** 2 +
+                    (well.trajectory[idx+1]['force']['lowering'] * delta_inc + point['weight'] *
+                     sin(point['incAvg'])) ** 2) ** 0.5
 
-            delta_ft_1 = w[x] * cos(inc_avg) - fric[x] * fn_1
-            ft_1 = force_1[-1] + delta_ft_1
-            force_1.append(ft_1)
+            delta_ft_1 = point['weight'] * cos(point['incAvg']) - point['fric'] * fn_1
+            point['force']['lowering'] = well.trajectory[idx+1]['force']['lowering'] + delta_ft_1
 
             if torque_calc:
                 # Torque calculation
-                delta_torque_1 = fric[x] * fn_1 * well.r2
-                t_1 = torque_1[-1] + delta_torque_1
-                torque_1.append(t_1)
+                delta_torque_1 = point['fric'] * fn_1 * well.pipe_or
+                point['torque']['lowering'] = well.trajectory[idx+1]['torque']['lowering'] + delta_torque_1
 
         if (case == "static") or (case == "all"):
 
             # Drag force
-            fn_2 = ((force_2[-1] * delta_azi * sin(inc_avg)) ** 2
-                    + (force_2[-1] * delta_inc + w[x] * sin(inc_avg)) ** 2) ** 0.5
+            fn_2 = ((well.trajectory[idx+1]['force']['static'] * delta_azi * sin(point['incAvg'])) ** 2 +
+                    (well.trajectory[idx+1]['force']['static'] * delta_inc + point['weight'] *
+                    sin(point['incAvg'])) ** 2) ** 0.5
 
-            delta_ft_2 = w[x] * cos(inc_avg)
-            ft_2 = force_2[-1] + delta_ft_2
-            force_2.append(ft_2)
+            delta_ft_2 = point['weight'] * cos(point['incAvg'])
+            point['force']['static'] = well.trajectory[idx+1]['force']['static'] + delta_ft_2
 
             if torque_calc:
                 # Torque calculation
-                delta_torque_2 = fric[x] * fn_2 * well.r2
-                t_2 = torque_2[-1] + delta_torque_2
-                torque_2.append(t_2)
+                delta_torque_2 = point['fric'] * fn_2 * well.pipe_or
+                point['torque']['static'] = well.trajectory[idx+1]['torque']['static'] + delta_torque_2
 
         if (case == "hoisting") or (case == "all"):
 
             # Drag force
-            fn_3 = ((force_3[-1] * delta_azi * sin(inc_avg)) ** 2
-                    + (force_3[-1] * delta_inc + w[x] * sin(inc_avg)) ** 2) ** 0.5
+            fn_3 = ((well.trajectory[idx+1]['force']['hoisting'] * delta_azi * sin(point['incAvg'])) ** 2 +
+                    (well.trajectory[idx+1]['force']['hoisting'] * delta_inc + point['weight'] *
+                     sin(point['incAvg'])) ** 2) ** 0.5
 
-            delta_ft_3 = w[x] * cos(inc_avg) + fric[x] * fn_3
-            ft_3 = force_3[-1] + delta_ft_3
-            force_3.append(ft_3)
+            delta_ft_3 = point['weight'] * cos(point['incAvg']) + point['fric'] * fn_3
+            point['force']['hoisting'] = well.trajectory[idx+1]['force']['hoisting'] + delta_ft_3
 
             if torque_calc:
                 # Torque calculation
-                delta_torque_3 = fric[x] * fn_3 * well.r2
-                t_3 = torque_3[-1] + delta_torque_3
-                torque_3.append(t_3)
+                delta_torque_3 = point['fric'] * fn_3 * well.pipe_or
+                point['torque']['hoisting'] = well.trajectory[idx+1]['torque']['hoisting'] + delta_torque_3
 
-    class Result(object):
+    class TaD(object):
         def __init__(self):
             self.force = {
-                "lowering": None,
-                "static": None,
-                "hoisting": None
+                "lowering": [],
+                "static": [],
+                "hoisting": []
             }
             self.torque = {
-                "lowering": None,
-                "static": None,
-                "hoisting": None
+                "lowering": [],
+                "static": [],
+                "hoisting": []
             }
+            self.depth = []
 
-            if (case == "lowering") or (case == "all"):
-                self.force["lowering"] = [i/1000 for i in force_1[::-1]]
-                if torque_calc:
-                    self.torque["lowering"] = [i/1000 for i in torque_1[::-1]]
-            if (case == "static") or (case == "all"):
-                self.force["static"] = [i/1000 for i in force_2[::-1]]
-                if torque_calc:
-                    self.torque["static"] = [i/1000 for i in torque_2[::-1]]
-            if (case == "hoisting") or (case == "all"):
-                self.force["hoisting"] = [i/1000 for i in force_3[::-1]]
-                if torque_calc:
-                    self.torque["hoisting"] = [i/1000 for i in torque_3[::-1]]
-
-            self.depth = well.md
+            for point in well.trajectory:
+                self.depth.append(point['md'])
+                if (case == "lowering") or (case == "all"):
+                    self.force['lowering'].append(point['force']['lowering'] / 1000)
+                    if torque_calc:
+                        self.torque['lowering'].append(point['torque']['lowering'] / 1000)
+                if (case == "static") or (case == "all"):
+                    self.force['static'].append(point['force']['static'] / 1000)
+                    if torque_calc:
+                        self.torque['static'].append(point['torque']['static'] / 1000)
+                if (case == "hoisting") or (case == "all"):
+                    self.force['hoisting'].append(point['force']['hoisting'] / 1000)
+                    if torque_calc:
+                        self.torque['hoisting'].append(point['torque']['hoisting'] / 1000)
 
         def plot(self, plot_case='Force'):
             from .plot import tnd
@@ -124,7 +135,7 @@ def calc(trajectory, dimensions, densities=None, case="all", fric=0.24, wob=0, t
 
             return fig
 
-    return Result()
+    return TaD()
 
 
 def set_conditions(trajectory, dimensions, densities=None, wob=0, tbit=0):
@@ -137,23 +148,20 @@ def set_conditions(trajectory, dimensions, densities=None, wob=0, tbit=0):
 
     class NewWell(object):
         def __init__(self):
-            self.r1 = dimensions['id_pipe'] / 2 / 39.37
-            self.r2 = dimensions['od_pipe'] / 2 / 39.37
-            self.r3 = dimensions['od_annular'] / 2 / 39.37
+            self.trajectory = trajectory
+            self.pipe_ir = dimensions['pipe']['id'] / 2 / 39.37
+            self.pipe_or = dimensions['pipe']['od'] / 2 / 39.37
+            self.ann_or = dimensions['odAnn'] / 2 / 39.37
             self.rhod = densities['rhod'] * 1000
-            self.deltaz = [0]
-            for x in range(1, len(trajectory.md)):
-                self.deltaz.append(trajectory.md[x] - trajectory.md[x-1])
-            self.zstep = len(self.deltaz)
+
             if type(densities['rhof']) is not list:
-                self.rhof = [densities['rhof'] * 1000] * self.zstep
+                for point in self.trajectory:
+                    point['rhof'] = densities['rhof'] * 1000   # in kg/m3
             else:
-                self.rhof = densities['rhof'] * 1000    # in kg/m3
+                for idx, point in enumerate(self.trajectory):
+                    point['rhof'] = densities['rhof'][idx] * 1000   # in kg/m3
+
             self.wob = wob      # in N
             self.tbit = tbit        # in Nm
-            self.azimuth = trajectory.azimuth
-            self.tvd = trajectory.tvd
-            self.md = trajectory.md
-            self.inclination = trajectory.inclination
 
     return NewWell()

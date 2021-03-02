@@ -22,17 +22,17 @@ def plot_sequence(data, depth, case='Force'):
     fig = go.Figure()
 
     values = []
-    if type(data["lowering"]) is list:
+    if len(data["lowering"]) > 0:
         fig.add_trace(go.Scatter(x=data["lowering"], y=depth,
                                  mode='lines',
                                  name='Lowering'))
         values += [min(data["lowering"]), max(data["lowering"])]
-    if type(data["static"]) is list:
+    if len(data["static"]) > 0:
         fig.add_trace(go.Scatter(x=data["static"], y=depth,
                                  mode='lines',
                                  name='Static'))
         values += [min(data["static"]), max(data["static"])]
-    if type(data["hoisting"]) is list:
+    if len(data["hoisting"]) > 0:
         fig.add_trace(go.Scatter(x=data["hoisting"], y=depth,
                                  mode='lines',
                                  name='Hoisting'))
