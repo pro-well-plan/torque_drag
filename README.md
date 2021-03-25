@@ -4,7 +4,7 @@
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/pro-well-plan/torque_drag/blob/master/LICENSE.md)
 [![PyPI version](https://badge.fury.io/py/torque-drag.svg)](https://badge.fury.io/py/torque-drag)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-[![Webapp](https://img.shields.io/badge/WebApp-On-green.svg)](https://pwp-opensource.herokuapp.com/)
+[![Webapp](https://img.shields.io/badge/WebApp-On-green.svg)](https://share.streamlit.io/jcamiloangarita/opensource_apps/app.py)
 [![Documentation Status](https://readthedocs.org/projects/torque_drag/badge/?version=latest)](http://torque_drag.readthedocs.io/?badge=latest)
 [![Downloads](https://pepy.tech/badge/torque-drag)](https://pepy.tech/project/torque-drag)
 
