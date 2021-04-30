@@ -7,7 +7,7 @@ def calc(trajectory, dimensions, densities=None, case="all", fric=None, wob=0, t
 
     Arguments:
         trajectory: a trajectory object from well_profile library
-        dimensions: dict for dimensions {'pipe': {'od', 'id', 'length}, 
+        dimensions: dict for dimensions {'pipe': {'od', 'id', 'length', 'shoe'},
                                          'odAnn'}
         densities: dict for densities {'rhof': 1.3, 'rhod': 7.8}
         case: "lowering", "static", "hoisting" or "all"
@@ -113,6 +113,7 @@ def calc(trajectory, dimensions, densities=None, case="all", fric=None, wob=0, t
                 "hoisting": []
             }
             self.depth = []
+            self.trajectory = well.trajectory
 
             for point in well.trajectory:
                 self.depth.append(point['md'])
@@ -148,7 +149,9 @@ def set_conditions(trajectory, dimensions, densities=None, wob=0, tbit=0):
 
     class NewWell(object):
         def __init__(self):
-            self.trajectory = trajectory
+            self.shoe = dimensions['pipe']['shoe']
+            self.trajectory = [x for x in trajectory if x['md'] <= self.shoe]
+            self.pipe_length = dimensions['pipe']['length']
             self.pipe_ir = dimensions['pipe']['id'] / 2 / 39.37
             self.pipe_or = dimensions['pipe']['od'] / 2 / 39.37
             self.ann_or = dimensions['odAnn'] / 2 / 39.37
