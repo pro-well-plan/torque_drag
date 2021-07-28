@@ -6,7 +6,7 @@
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Webapp](https://img.shields.io/badge/WebApp-On-green.svg)](https://share.streamlit.io/jcamiloangarita/opensource_apps/app.py)
 [![Documentation Status](https://readthedocs.org/projects/torque_drag/badge/?version=latest)](http://torque_drag.readthedocs.io/?badge=latest)
-[![Build Status](https://www.travis-ci.com/pro-well-plan/torque_drag.svg?branch=master)](https://www.travis-ci.com/pro-well-plan/torque_drag)
+[![Tests](https://github.com/pro-well-plan/torque_drag/workflows/Tests/badge.svg)](https://github.com/pro-well-plan/torque_drag/actions)
 [![Downloads](https://pepy.tech/badge/torque-drag)](https://pepy.tech/project/torque-drag)
 
 ## Introduction
