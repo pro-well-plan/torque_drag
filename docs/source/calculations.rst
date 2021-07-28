@@ -6,11 +6,11 @@ Calculating Torque & Drag
 
 .. code-block:: python
 
-    >>> import well_profile
-    >>> import torque_drag
-    >>> well = well_profile.load('trajectory1.xlsx')
-    >>> dimensions = {'od_pipe': 4.5, 'id_pipe': 4, 'length_pipe': 2200, 'od_annular': 5}
-    >>> result = torque_drag.calc(well, dimensions, case='all', torque_calc=True, wob=50, tbit=50)
+    >>> import well_profile as wp
+    >>> import torque_drag as td
+    >>> well = wp.load('trajectory1.xlsx')
+    >>> dimensions = {'pipe': {'od': 4.5, 'id': 4, 'shoe': 3000}, 'odAnn': 5}
+    >>> result = td.calc(well.trajectory, dimensions, case='all', torque_calc=True, wob=50, tbit=50)
     >>> result.plot(plot_case='Force').show()
     >>> result.plot(plot_case='Torque').show()
 
@@ -28,13 +28,13 @@ Drag Force
 
 .. code-block:: python
 
-    >>> print(result.force['lowering']))
+    >>> print(result.force['lowering'])
     [372.2971700118521, 368.13599093625027, 363.97481186064846, ...]
 
-    >>> print(result.force['static']))
+    >>> print(result.force['static'])
     [422.85963348870627, 418.69845441310446, 414.53727533750265, ...]
 
-    >>> print(result.force['hoisting']))
+    >>> print(result.force['hoisting'])
     [486.97807188086904, 482.81689280526723, 478.6557137296654, ...]
 
 
@@ -43,11 +43,11 @@ Torque
 
 .. code-block:: python
 
-    >>> print(result.torque['lowering']))
+    >>> print(result.torque['lowering'])
     [52.88965056700336, 52.88965056700336, 52.88965056700336, ...]
 
-    >>> print(result.torque['static']))
+    >>> print(result.torque['static'])
     [53.24879605055506, 53.24879605055506, 53.24879605055506, ...]
 
-    >>> print(result.torque['hoisting']))
+    >>> print(result.torque['hoisting'])
     [53.66437608286427, 53.66437608286427, 53.66437608286427, ...]
