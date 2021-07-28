@@ -150,8 +150,9 @@ def set_conditions(trajectory, dimensions, densities=None, wob=0, tbit=0):
     class NewWell(object):
         def __init__(self):
             self.shoe = dimensions['pipe']['shoe']
-            self.trajectory = [x for x in trajectory if x['md'] <= self.shoe]
-            self.pipe_length = dimensions['pipe']['length']
+            self.pipe_length = dimensions['pipe'].get('length', self.shoe)
+            self.top = self.shoe - self.pipe_length
+            self.trajectory = [x for x in trajectory if self.top <= x['md'] <= self.shoe]
             self.pipe_ir = dimensions['pipe']['id'] / 2 / 39.37
             self.pipe_or = dimensions['pipe']['od'] / 2 / 39.37
             self.ann_or = dimensions['odAnn'] / 2 / 39.37
